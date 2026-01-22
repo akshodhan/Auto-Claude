@@ -84,13 +84,19 @@ def create_simple_client(
         thinking_level = get_default_thinking_level(agent_type)
         max_thinking_tokens = get_thinking_budget(thinking_level)
 
+    def quote_path(path: str) -> str:
+        """Quote path to handle spaces on Windows and Unix."""
+        if " " in path:
+            return f'"{path}"'
+        return path
+
     return ClaudeSDKClient(
         options=ClaudeAgentOptions(
             model=model,
             system_prompt=system_prompt,
             allowed_tools=allowed_tools,
             max_turns=max_turns,
-            cwd=str(cwd.resolve()) if cwd else None,
+            cwd=quote_path(str(cwd.resolve())) if cwd else None,
             env=sdk_env,
             max_thinking_tokens=max_thinking_tokens,
         )

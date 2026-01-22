@@ -5,6 +5,7 @@
 import type { NotificationSettings, GraphitiEmbeddingProvider } from './project';
 import type { ChangelogFormat, ChangelogAudience, ChangelogEmojiLevel } from './changelog';
 import type { SupportedLanguage } from '../constants/i18n';
+import type { AIProvider, CodingAgentProfile } from './ai-provider';
 
 // Color theme types for multi-theme support
 export type ColorTheme = 'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest';
@@ -256,6 +257,10 @@ export interface AppSettings {
   // Feature-specific configuration (insights, ideation, roadmap)
   featureModels?: FeatureModelConfig;
   featureThinking?: FeatureThinkingConfig;
+  // Multi-agent support
+  activeAIProvider?: AIProvider;
+  selectedAIProfile?: string;
+  customAIProfiles?: CodingAgentProfile[];
   // Changelog preferences
   changelogFormat?: ChangelogFormat;
   changelogAudience?: ChangelogAudience;
