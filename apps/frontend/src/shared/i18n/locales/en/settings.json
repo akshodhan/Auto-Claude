@@ -25,6 +25,10 @@
       "title": "Agent Settings",
       "description": "Default model and framework"
     },
+    "ai-providers": {
+      "title": "AI Providers",
+      "description": "Manage multiple AI providers"
+    },
     "paths": {
       "title": "Paths",
       "description": "CLI tools and framework paths"

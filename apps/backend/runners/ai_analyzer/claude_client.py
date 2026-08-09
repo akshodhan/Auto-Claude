@@ -101,6 +101,12 @@ class ClaudeAnalysisClient:
         Returns:
             ClaudeSDKClient instance
         """
+        def quote_path(path: str) -> str:
+            """Quote path to handle spaces on Windows and Unix."""
+            if " " in path:
+                return f'"{path}"'
+            return path
+
         system_prompt = (
             f"You are a senior software architect analyzing this codebase. "
             f"Your working directory is: {self.project_dir.resolve()}\n"
@@ -114,8 +120,8 @@ class ClaudeAnalysisClient:
                 system_prompt=system_prompt,
                 allowed_tools=self.ALLOWED_TOOLS,
                 max_turns=self.MAX_TURNS,
-                cwd=str(self.project_dir.resolve()),
-                settings=str(settings_file.resolve()),
+                cwd=quote_path(str(self.project_dir.resolve())),
+                settings=quote_path(str(settings_file.resolve())),
             )
         )
 

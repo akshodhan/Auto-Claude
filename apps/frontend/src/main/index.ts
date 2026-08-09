@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, nativeImage } from 'electron';
+import { app, BrowserWindow, shell, nativeImage, dialog, session } from 'electron';
 import { join } from 'path';
 import { accessSync, readFileSync, writeFileSync } from 'fs';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
@@ -87,15 +87,42 @@ function createWindow(): void {
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    // In development we load the dev server URL
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    // In production or packaged builds, load the built renderer file
+    try {
+      mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    } catch (err) {
+      console.error('[main] Failed to load renderer file:', err);
+      // Show a helpful dialog to the user rather than crashing silently
+      dialog.showErrorBox('Missing files', 'Renderer files are missing. Run "npm run build" or use the dev server (npm run dev).');
+      app.quit();
+    }
   }
 
   // Open DevTools in development
   if (is.dev) {
     mainWindow.webContents.openDevTools({ mode: 'right' });
   }
+
+  // Security: warn about insecure Content-Security-Policy if present during dev
+  // (prevent unsafe-eval or missing CSP in packaged apps)
+  const { webContents } = mainWindow;
+  webContents.on('did-frame-finish-load', async () => {
+    const response = await webContents.executeJavaScript("document.querySelector('meta[http-equiv=\"Content-Security-Policy\"]')?.getAttribute('content') || ''");
+    if (!response || /unsafe-eval/.test(response)) {
+      console.warn('[main] Insecure Content-Security-Policy detected.');
+      // Only show a dev-time dialog to inform developer
+      if (is.dev) {
+        dialog.showMessageBox({
+          type: 'warning',
+          title: 'Insecure Content Security Policy',
+          message: 'Renderer has no Content-Security-Policy or uses unsafe-eval. Avoid this in production. See https://electronjs.org/docs/tutorial/security'
+        });
+      }
+    }
+  });
 
   // Clean up on close
   mainWindow.on('closed', () => {

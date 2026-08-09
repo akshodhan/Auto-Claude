@@ -727,6 +727,18 @@ def create_client(
     print()
 
     # Build options dict, conditionally including output_format
+    # Quote paths to handle spaces in usernames on Windows
+    def quote_path(path: str) -> str:
+        """Quote path to handle spaces on Windows and Unix."""
+        # On Windows, use double quotes for paths with spaces
+        # On Unix, single quotes work but subprocess handles quoting with list args
+        # We'll use double quotes as they work on both platforms for most shells
+        if " " in path:
+            return f'"{path}"'
+        return path
+
+    cwd_quoted = quote_path(str(project_dir.resolve()))
+    settings_quoted = quote_path(str(settings_file.resolve()))
     options_kwargs = {
         "model": model,
         "system_prompt": base_prompt,
@@ -738,8 +750,8 @@ def create_client(
             ],
         },
         "max_turns": 1000,
-        "cwd": str(project_dir.resolve()),
-        "settings": str(settings_file.resolve()),
+        "cwd": cwd_quoted,
+        "settings": settings_quoted,
         "env": sdk_env,  # Pass ANTHROPIC_BASE_URL etc. to subprocess
         "max_thinking_tokens": max_thinking_tokens,  # Extended thinking budget
     }

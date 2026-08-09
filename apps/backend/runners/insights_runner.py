@@ -177,6 +177,13 @@ Current question: {message}"""
     )
 
     try:
+        # Quote path to handle spaces in usernames on Windows
+        def quote_path(path: str) -> str:
+            """Quote path to handle spaces on Windows and Unix."""
+            if " " in path:
+                return f'"{path}"'
+            return path
+
         # Create Claude SDK client with appropriate settings for insights
         client = ClaudeSDKClient(
             options=ClaudeAgentOptions(
@@ -188,7 +195,7 @@ Current question: {message}"""
                     "Grep",
                 ],
                 max_turns=30,  # Allow sufficient turns for codebase exploration
-                cwd=str(project_path),
+                cwd=quote_path(str(project_path)),
             )
         )
 

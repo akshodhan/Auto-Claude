@@ -24,6 +24,9 @@ export * from './changelog';
 // Model and agent profile constants
 export * from './models';
 
+// AI Provider constants
+export * from './ai-providers';
+
 // Theme constants
 export * from './themes';
 
